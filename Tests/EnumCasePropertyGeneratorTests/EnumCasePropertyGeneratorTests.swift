@@ -7,19 +7,40 @@ import XCTest
 import EnumCasePropertyGeneratorMacros
 
 let testMacros: [String: Macro.Type] = [
-    "stringify": StringifyMacro.self,
+    "EnumCasePropertyGenerator": EnumCasePropertyGeneratorMacro.self,
 ]
 #endif
 
 final class EnumCasePropertyGeneratorTests: XCTestCase {
-    func testMacro() throws {
+    
+    func testEnumCasePropertyGenerator() throws {
         #if canImport(EnumCasePropertyGeneratorMacros)
         assertMacroExpansion(
             """
-            #stringify(a + b)
+            @EnumCasePropertyGenerator
+            enum Fruit {
+                case apple, banana
+                case dragonFruit
+            }
             """,
-            expandedSource: """
-            (a + b, "a + b")
+            expandedSource:
+            """
+            enum Fruit {
+                case apple, banana
+                case dragonFruit
+            
+                var isApple: Bool {
+                    return self == .apple
+                }
+            
+                var isBanana: Bool {
+                    return self == .banana
+                }
+            
+                var isDragonFruit: Bool {
+                    return self == .dragonFruit
+                }
+            }
             """,
             macros: testMacros
         )
@@ -27,20 +48,28 @@ final class EnumCasePropertyGeneratorTests: XCTestCase {
         throw XCTSkip("macros are only supported when running tests for the host platform")
         #endif
     }
-
-    func testMacroWithStringLiteral() throws {
+    
+    func testEnumIdentifiableOnStruct() throws {
         #if canImport(EnumCasePropertyGeneratorMacros)
         assertMacroExpansion(
-            #"""
-            #stringify("Hello, \(name)")
-            """#,
-            expandedSource: #"""
-            ("Hello, \(name)", #""Hello, \(name)""#)
-            """#,
+            """
+            @EnumCasePropertyGenerator
+            struct Fruit {
+            }
+            """,
+            expandedSource:
+            """
+            struct Fruit {
+            }
+            """,
+            diagnostics: [
+                DiagnosticSpec(message: "'@EnumCasePropertyGenerator' can only be applied to an 'enum'", line: 1, column: 1)
+            ],
             macros: testMacros
         )
         #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
         #endif
     }
+    
 }

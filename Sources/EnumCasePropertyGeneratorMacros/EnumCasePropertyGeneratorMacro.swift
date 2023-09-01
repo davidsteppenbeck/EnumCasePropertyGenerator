@@ -3,31 +3,56 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-/// Implementation of the `stringify` macro, which takes an expression
-/// of any type and produces a tuple containing the value of that expression
-/// and the source code that produced the value. For example
-///
-///     #stringify(x + y)
-///
-///  will expand to
-///
-///     (x + y, "x + y")
-public struct StringifyMacro: ExpressionMacro {
+public struct EnumCasePropertyGeneratorMacro: MemberMacro {
+    
     public static func expansion(
-        of node: some FreestandingMacroExpansionSyntax,
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
-    ) -> ExprSyntax {
-        guard let argument = node.argumentList.first?.expression else {
-            fatalError("compiler bug: the macro does not have any arguments")
+    ) throws -> [DeclSyntax] {
+        guard let enumDecl = declaration.as(EnumDeclSyntax.self) else {
+            throw EnumCasePropertyGeneratorError.notAnEnum
         }
+        
+        let cases = enumDecl.memberBlock.members.compactMap {
+            $0.decl.as(EnumCaseDeclSyntax.self)
+        }
+        
+        return try cases.flatMap(\.elements).map {
+            let name = $0.name
+            let text = name.text
+            
+            guard let firstLetterCap = text.capitalized.first else {
+                throw EnumCasePropertyGeneratorError.caseNameMustContainAtLeastOneLetter
+            }
+            
+            return """
+            var \(raw: "is\(firstLetterCap)\(text.dropFirst())"): Bool {
+                return self == .\(name)
+            }
+            """
+        }
+    }
+    
+}
 
-        return "(\(argument), \(literal: argument.description))"
+enum EnumCasePropertyGeneratorError: Error, CustomStringConvertible {
+    case notAnEnum
+    case caseNameMustContainAtLeastOneLetter
+    
+    var description: String {
+        switch self {
+        case .notAnEnum:
+            return "'@EnumCasePropertyGenerator' can only be applied to an 'enum'"
+        case .caseNameMustContainAtLeastOneLetter:
+            return "'enum' case names must contain at least one letter"
+        }
     }
 }
 
 @main
 struct EnumCasePropertyGeneratorPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        StringifyMacro.self,
+        EnumCasePropertyGeneratorMacro.self,
     ]
 }

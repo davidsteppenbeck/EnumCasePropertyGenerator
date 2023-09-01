@@ -1,11 +1,31 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
-
-/// A macro that produces both a value and a string containing the
-/// source code that generated the value. For example,
+/// An attached macro for `enum` that provides a computed property for each case that checks whether or not the current instance is equal to that case.
+/// Applying the macro to anything other than an `enum` will result in a compile time error.
 ///
-///     #stringify(x + y)
+/// Applying `@EnumCasePropertyGenerator` to an `enum`
 ///
-/// produces a tuple `(x + y, "x + y")`.
-@freestanding(expression)
-public macro stringify<T>(_ value: T) -> (T, String) = #externalMacro(module: "EnumCasePropertyGeneratorMacros", type: "StringifyMacro")
+///     @EnumCasePropertyGenerator
+///     enum Fruit {
+///         case apple, banana
+///         case dragonFruit
+///     }
+///
+/// results in the following code automatically
+///
+///     enum Fruit {
+///         case apple, banana
+///         case dragonFruit
+///
+///         var isApple: Bool {
+///             return self == .apple
+///         }
+///
+///         var isBanana: Bool {
+///             return self == .banana
+///         }
+///
+///         var isDragonFruit: Bool {
+///             return self == .dragonFruit
+///         }
+///     }
+@attached(member, names: arbitrary)
+public macro EnumCasePropertyGenerator() = #externalMacro(module: "EnumCasePropertyGeneratorMacros", type: "EnumCasePropertyGeneratorMacro")
