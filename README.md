@@ -1,6 +1,6 @@
 # EnumCasePropertyGenerator
 
-EnumCasePropertyGenerator is a Swift macro for `enum` that provides automatic generation of computed properties for its cases.
+`EnumCasePropertyGenerator` is a Swift macro for `enum` that provides automatic generation of computed properties for its cases.
 
 ## Usage
 
