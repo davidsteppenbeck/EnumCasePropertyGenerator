@@ -1,6 +1,6 @@
 # EnumCasePropertyGenerator
 
-`EnumCasePropertyGenerator` is a Swift macro for `enum` that provides automatic generation of computed properties for its cases.
+`EnumCasePropertyGenerator` is an attached Swift macro for `enum` that provides automatic generation of computed properties for its cases.
 
 ## Usage
 
@@ -37,7 +37,7 @@ enum Fruit {
 
 ## Installation
 
-The package can be installed using [Swift Package Manager](https://swift.org/package-manager/). To add EnumIdentifiable to your Xcode project, select *File > Add Package Dependancies...* and search for the repository URL: `https://github.com/davidsteppenbeck/EnumCasePropertyGenerator`.
+The package can be installed using [Swift Package Manager](https://swift.org/package-manager/). To add EnumIdentifiable to your Xcode project, select *File > Add Package Dependancies...* and search for the repository URL: `https://github.com/davidsteppenbeck/EnumCasePropertyGenerator.git`.
 
 ## License
 
